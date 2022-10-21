@@ -1,0 +1,52 @@
+#+title: Install k8s using ansible
+
+* Playbook
+** Requirements
+- Modify the host in the ~inventory.yaml~ file, and make sure that is the one you are using
+- You can add as many nodes as you want.
+- Change the ~controlplane~ host in the playbook under the ~Cluster  play~ play. This is necesary to initialize the cluster for the controlplane.
+
+To run this playbook copy the following command:
+#+begin_src bash
+ansible-playbook playbook.yaml
+#+end_src
+
+* Tasks
+The playbook will run the necesary tasks to prepare and bootstrap kubernetes using the ~kubeadm~ tool.
+** Install Containerd
+- Remove previous dependencies
+- Install updated dependencies
+- Add docker oficial gpg key
+- Download Docker gpg key
+- Add docker repo to source list
+- Update packages database
+- Install containerd
+- Add default config to ~/etc/containerd~
+- Restart and enable ~containerd~ service
+
+** Prepare system for installation
+- Disable swap
+- Add the network modules
+- Configure the ~ip_tables~
+
+** Install Kubernetes
+- Install kubernetes dependenecies
+- Add google public signing key to keyring
+- Add google repo to source list
+- Install ~kubeadm~, ~kubectl~ and ~kubelet~
+
+** Bootstrap k8s with kubadm
+- Pull k8s images
+- Bootstrap kubernetes
+- Create ~.kube~ folder in user home directory
+- Add ~kubeconfig~ file to user home directory
+- Deploy calico network as a ~cni~
+
+* Join worker to cluster
+In the controlplane:
+
+#+begin_src bash
+kubeadm token create --print-join-command
+#+end_src
+
+* Have fun!!!
