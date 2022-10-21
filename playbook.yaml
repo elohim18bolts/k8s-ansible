@@ -1,0 +1,19 @@
+- name: Containerd & Kubernetes Play
+  hosts: all
+  become: yes
+  tasks:
+    - name: Run containerd task
+      ansible.builtin.import_tasks: tasks/install_containerd.yaml
+
+    - name: Prepare system for kubernetes installation
+      ansible.builtin.import_tasks: tasks/prepare_for_installation.yaml
+
+    - name: Install kubernetes
+      ansible.builtin.import_tasks: tasks/install_kubernetes.yaml
+
+- name: Cluster Play
+  hosts: k8s-controlplane
+  become: yes
+  tasks:
+    - name: Initialize Cluster
+      ansible.builtin.import_tasks: tasks/bootstrap_kubeadm.yaml

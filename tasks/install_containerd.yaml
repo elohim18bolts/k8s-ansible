@@ -1,0 +1,54 @@
+- name: Removing docker dependencies
+  ansible.builtin.apt:
+    pkg:
+      - docker
+      - docker-engine
+      - docker.io
+      - containerd
+      - runc
+    state: absent
+
+- name: Install deps
+  ansible.builtin.apt:
+    update_cache: yes
+    pkg:
+      - ca-certificates
+      - curl
+      - gnupg
+      - lsb-release
+    state: latest
+
+- name: Add Docker official gpg key
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+
+- name: Download Docker gpg key
+  ansible.builtin.shell: |
+    curl -fsSL https://download.docker.com/linux/ubuntu/gpg |  gpg --yes --dearmor -o /etc/apt/keyrings/docker.gpg
+    exit 0
+
+- name: Add repo to source lists
+  ansible.builtin.shell: |
+    echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+- name: Update db
+  ansible.builtin.apt:
+    update_cache: yes
+
+- name: Install containerd
+  ansible.builtin.apt:
+    name: containerd.io
+    state: latest
+
+
+- name: Add default config to /etc/containerd
+  ansible.builtin.shell: |
+      containerd config default | sudo tee /etc/containerd/config.toml >/dev/null 2>&1
+      sed -i 's/SystemdCgroup \= false/SystemdCgroup \= true/g' /etc/containerd/config.toml
+
+- name: Enable containerd service
+  ansible.builtin.service:
+    name: containerd
+    state: restarted
+    enabled: yes

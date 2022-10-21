@@ -1,0 +1,4 @@
+ all:
+   hosts:
+     k8s-controlplane:
+      ansible_user: elo
